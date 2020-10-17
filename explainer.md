@@ -100,7 +100,7 @@ An example of how a logbook in JSON format would look like is shown below:
   {
     "encounter": { "date": "2018-08-01", "session": "Morning" },
     "case": {
-      "type": "anaesthetic"
+      "type": "anaesthetic",
       "speciality": "Plastics",
       "operation": "Other",
       "priority": "Elective",
@@ -120,7 +120,7 @@ An example of how a logbook in JSON format would look like is shown below:
     "metadata": {
       "id": "anaesthetic-1",
       "name": "lifelong.rcoa.ac.uk",
-      "version": "b1"
+      "version": "b1",
       "dt_insert": 1601298522643,
       "dt_start": 1533153600000
     },
@@ -128,7 +128,7 @@ An example of how a logbook in JSON format would look like is shown below:
   {
     "encounter": { "date": "2018-08-01", "session": "Afternoon" },
     "case": {
-      "type": "anaesthetic"
+      "type": "anaesthetic",
       "speciality": "ENT",
       "operation": "Adeno- tonsillectomy",
       "priority": "Immediate",
@@ -150,7 +150,7 @@ An example of how a logbook in JSON format would look like is shown below:
     "metadata": {
       "id": "anaesthetic-2",
       "name": "lifelong.rcoa.ac.uk",
-      "version": "b1"
+      "version": "b1",
       "dt_insert": 1601298522643,
       "dt_start": 1533153600000
     },
