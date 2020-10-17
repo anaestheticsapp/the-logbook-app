@@ -1,3 +1,12 @@
+---
+title: Logbook File Format
+date: 2020-10-17
+summary: Proposed data structure for the .logbook file format
+meta: File extension and format for .logbook files
+tags: logbook
+img: ''
+---
+
 # Standard for logbook files
 * File extension: ```.logbook```
 * File format: JSON
