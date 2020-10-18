@@ -76,7 +76,7 @@ When using the JSON file format, logbook cases are stored in arrays and each arr
 /**
  * @type {object}
  * @property {object} encounter - date and session
- * @property {object} case - case details for anaesthetic, criticalcare, clinic, pain, ... cases
+ * @property {object} details - case details for anaesthetic, criticalcare, clinic, pain, ... cases
  * @property {object} patient - age, age_units, asa
  * @property {object} training - supervision, supervisor, teaching
  * @property {array} regional - list of regional procedures
@@ -99,7 +99,7 @@ An example of how a logbook in JSON format would look like is shown below:
 [
   {
     "encounter": { "date": "2018-08-01", "session": "Morning" },
-    "case": {
+    "details": {
       "type": "anaesthetic",
       "speciality": "Plastics",
       "operation": "Other",
@@ -127,7 +127,7 @@ An example of how a logbook in JSON format would look like is shown below:
   },
   {
     "encounter": { "date": "2018-08-01", "session": "Afternoon" },
-    "case": {
+    "details": {
       "type": "anaesthetic",
       "speciality": "ENT",
       "operation": "Adeno- tonsillectomy",

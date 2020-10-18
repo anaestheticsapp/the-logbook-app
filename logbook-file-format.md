@@ -24,7 +24,7 @@ img: ''
 /**
  * @type {object}
  * @property {object} encounter - date and session
- * @property {object} case - case details for anaesthetic, criticalcare, clinic, pain, ... cases
+ * @property {object} details - case details for anaesthetic, criticalcare, clinic, pain, ... cases
  * @property {object} patient - age, age_units, asa
  * @property {object} training - supervision, supervisor, teaching
  * @property {array} regional - list of regional procedures
@@ -46,13 +46,13 @@ img: ''
  */
 ```
 
-### Case
+### Details
 ```js
 /**
  * @type {object}
- * @name case
+ * @name details
  *
- * @variation case(1)
+ * @variation details(1)
  * @property {string} type - anaesthetic
  * @property {string} speciality - speciality of case
  * @property {string} operation - custom names are possible
@@ -64,7 +64,7 @@ img: ''
  * @property {string} tertiary_speciality - (optional)
  * @property {string} tertiary_operation - (optional)
  *
- * @variation case(2)
+ * @variation details(2)
  * @property {string} type - criticalcare
  * @property {string} diagnosis - allow custom diagnosis
  * @property {string} event - for example "Admission"
@@ -72,7 +72,7 @@ img: ''
  * @property {string} speciality - (optional)
  * @property {array} support - see below (optional)
  *
- * @variation case(3) - logbooks have the option to use further types (these are optional, non-standard and may not be supported by other logbooks)
+ * @variation details(3) - logbooks have the option to use further types (these are optional, non-standard and may not be supported by other logbooks)
  * @property {string} type -  ie. clinic, pain, procedure, session, ...
  */
 ```
@@ -128,7 +128,8 @@ img: ''
  * Evening - 18:00:00
  * Night - 22:00:00
 
-## Further optional values being used by the AnaestheticsApp Logbook
+## Optional properties being used by third-party logbooks
+### AnaestheticsApp Logbook
 ```js
 /**
  * further properties found in the main object
