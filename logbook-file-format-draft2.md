@@ -12,7 +12,8 @@ img: ''
 * File format: JSON
 * Mime type: ```text/json```
 * Use case: anaesthesia logbooks
-* JSON schema will follow once details are final
+* Preview: [TheLogbook App](https://www.youtube.com/watch?v=iSJ5rMXmSbk)
+* JSON schema: will follow once details are final
 
 # Object structure
 
