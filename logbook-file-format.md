@@ -1,13 +1,13 @@
 ---
 title: Logbook File Format
-date: 2020-10-19
+date: 2020-10-25
 summary: Proposed data structure for the .logbook file format
 meta: File extension and format for .logbook files
 tags: logbook
 img: ''
 ---
 
-# Standard for logbook files
+# Standard for Logbook Files
 * File extension: ```.logbook```
 * File format: JSON
 * Mime type: ```text/json```
@@ -15,8 +15,7 @@ img: ''
 * Example applications that can open ```.logbook``` files:
   * The Logbook App [Preview Video](https://www.youtube.com/watch?v=iSJ5rMXmSbk)
 
-# Object structure
-## Deep vs Flat Objects
+# Deep vs Flat Objects
 There is no right or wrong answer, but one of the problems when looking for a property that's deep in a tree-like structure is that one often has to check whether intermediate nodes exist. Using the proposed ```event``` object as an example:
 
 ```js
@@ -60,7 +59,22 @@ This adds a lot of complexity to the code, especially when writing a function to
 const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction;
 ```
 
-## Minimal data set
+# JSON Style Guidelines
+* Property names
+  * Avoid the use of reserved JavaScript keywords (relevant here are "case", "private", "public").
+  * The first character must be a letter or an underscore (_).
+  * Subsequent letters can include any letter, number, or underscore.
+  * Variable names are case sensitive.
+  * Words should be joined and capitalised (ie ageUnits) rather than separated with an underscore (age_units).
+  * Array types should have plural property names, other fields are singular.
+  * Naming conflicts are avoided by incrementing the ```metadata.version``` value.
+* Property values
+  * Must be Unicode booleans, numbers, strings, objects, arrays, or null.
+  * Properties should be removed if a property value is empty or null.
+    * Properties with empty arrays should not be dropped.
+    * Does not apply to properties such as ```age``` or ```version```.
+
+# Minimal Data Set
 * Mandatory data fields
 * Contains data required for the ARCP in the UK and must be present in every .logbook file
 * Properties are required unless stated otherwise
@@ -68,29 +82,15 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
 ```js
 /**
  * @type {object}
+ * @property {object} event - date for theatre, icm, clinic, pain,...
+ * @property {array} incidents - array of item objects
+ * @property {object} metadata - data required by the logbook to interpret and handle the logbook case
+ * @property {string} note - general notes
+ * @property {object} patient - age, asa
+ * @property {array} procedures - list of procedures, including regional
+ * @property {object} setting - country, rotation, location (hospital)
  * @property {object} timing - date and session
- * @property {object} event - details for anaesthetic, criticalcare, clinic, pain, ... cases
- * @property {object} patient - age, age_units, asa
  * @property {object} training - supervision, supervisor, teaching
- * @property {array} procedures - list of procedures
- * @property {array} incidents - list of incidents (all strings)
- * @property {string} notes - general notes
- * @property {object} metadata - logbook origin, version, unique case id, timestamps (start and inserted)
- */
-```
-
-### Timing
-* Most modern logbooks store ```sessions``` rather than ```start``` and ```end``` times
-* ```Start``` and ```end``` times from older logbooks can be converted to ```session``` and ```duration```
-* Medberry only uses three sessions ("Day", "Evening", "Night") whilst most other logbooks use four sessions ("Morning", "Afternoon", "Evening", "Night")
-
-```js
-/**
- * @type {object}
- * @name timing
- * @property {string} date - ISO 8601 format "YYYY-MM-DD"
- * @property {string} session - "Morning", "Afternoon", "Evening", "Night"
- * @property {number} duration - in minutes (optional)
  */
 ```
 
@@ -101,16 +101,15 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
 /**
  * @type {object}
  * @name event
- * @property {string} activity - theatre | procedure | clinic | admission | daily review | ward review | cardiac arrest | trauma team | ward round | intra-hospital transfer | inter-hospital transfer | discussion with relatives | end of life care/donation
- * @property {string} category - anaesthesia | icm | pain | aim | em | phem
- * @property {object} details - see below
+ * @property {string} context - theatre | icm | phem | clinic | pain | procedure | session
+ * @property {object} data
  */
 ```
-#### Event > Details
+#### Event > Data
 ```js
 /**
- * @variation details(1) - category: anaesthesia and activity: theatre
- * @property {string} name - custom names are possible
+ * @variation data(1) - context: theatre
+ * @property {string} operation - custom names are possible
  * @property {string} speciality - speciality of case
  * @property {string} priority - "Elective", "Urgent", "Expedited", "Immediate" - NCEPOD Classification
  * @property {string} destination - "Day Case", "Ward", "POCU", "Critical Care"
@@ -119,58 +118,28 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  * @property {string} tertiary_name - (optional)
  * @property {string} tertiary_speciality - (optional)
  *
- * @variation details(2) - activity: clinic
- * @property {string} name - C-PEX, Pre-op, Chronic Pain
+ * @variation data(2) - context: clinic
+ * @property {string} type - C-PEX, Pre-op, Chronic Pain
  *
- * @variation details(3) - category: icm
- * @property {string} name - diagnosis such as "Pneumonia", "Diabetic ketoacidosis"
+ * @variation data(3) - context: icm
+ * @property {string} diagnosis - diagnosis such as "Pneumonia", "Diabetic ketoacidosis"
+ * @property {string} activity - admission | daily review | ward review | cardiac arrest | trauma team | ward round | intra-hospital transfer | inter-hospital transfer | discussion with relatives | end of life care/donation
  * @property {string} speciality - (optional)
  * @property {string} referral - ie. "Hypotension" (optional)
  * @property {array} support - see below (optional)
  */
 ```
 
-### Patient
-* A lot of logbooks use age (+/- age units). These should be included in the patient object to prevent any loss of data and to allow re-importing logbook cases into the respective logbook.
-
+### Incidents
 ```js
 /**
  * @type {object}
- * @name patient
- * @property {number} age - no decimals allowed
- * @property {string} age_units - only the following options are allowed: "Days", "Months", "Years"
- * @property {number} age_category - range 1-5
- * @property {number} asa - range 1-6 (6 being "Donor") [ASA Classification](https://www.asahq.org/standards-and-guidelines/asa-physical-status-classification-system)
- */
-```
-
-### Training
-* The RCoA LLP and AnaestheticsApp Logbook use teaching and supervision when logging theatre cases
-
-```js
-/**
- * @type {object}
- * @name training
- * @property {string} supervision - only the following options are allowed: "Immediate", "Local", "Direct", "Remote", "Solo" [NOTES TO PROVIDE CLARIFICATION OF ACSA STANDARDS](https://www.rcoa.ac.uk/sites/default/files/documents/2019-08/ACSA-SelfAssessment-2019.pdf)
- * @property {string} supervisor - ie "Consultant"; custom options are allowed
- * @property {string} supervisor_id - optional
- * @property {string} supervisor_name - optional
- * @property {string} teaching - ie "Medical Student"; custom options are allowed
- */
-```
-
-### Procedures
-```js
-/**
- * @type {object}
- * @property {string} category - airway, lines, regional, general
- * @property {string} name - name of regional, procedure, airway, mode of anaesthesia
- * @property {array} technique - "Landmark", "Ultrasound", "Nerve Stimulator", "Catheter"
- * @property {array} supervision - "Immediate", "Local", "Distant", "Solo"
+ * @property {string} name - name of incident
  */
 ```
 
 ### Metadata
+* Data stored here is required by the logbook to interpret and handle the encounter - the user should not be allowed to directly edit any properties
 * The ```start``` timestamp is made up of the date and session time
   * Morning - 08:00:00
   * Afternoon - 13:00:00
@@ -185,17 +154,86 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  * @name metadata
  * @property {string} id - case id that must be unique
  * @property {string} name - logbook website, without "https://", ie "anaesthetics.app" or "lifelong.rcoa.ac.uk"
- * @property {number} version - version of logbook data schema, increment when object schema is modified
  * @property {object} timestamp - timestamps in milliseconds
  * @property {number} timestamp.start - timestamp when case was started
  * @property {number} timestamp.inserted - timestamp when case was inserted
  * @property {number} timestamp.edited - timestamp when case was edited (optional)
- * @property {object} setting
- * @property {string} setting.country - ISO 3166-1 alpha-2 country codes, such as "gb", "de", "at", "ug" (optional)
- * @property {string} setting.rotation - ie "North West" (optional)
- * @property {string} setting.location - ie "Manchester Royal Infirmary" (optional)
+ * @property {number} version - represents version of logbook data schema, increment when object schema is modified
  */
 ```
+
+### Patient
+* A lot of logbooks use age (+/- age units). These should be included in the patient object to prevent any loss of data and to allow re-importing logbook cases into the respective logbook.
+
+```js
+/**
+ * @type {object}
+ * @name patient
+ * @property {number} age - no decimals allowed
+ * @property {string} ageUnits - only the following options are allowed: "Days", "Months", "Years"
+ * @property {number} ageCategory - range 1-5 (optional)
+ * @property {number} asa - range 1-6 (6 being "Donor") [ASA Classification](https://www.asahq.org/standards-and-guidelines/asa-physical-status-classification-system)
+ */
+```
+
+### Procedures
+```js
+/**
+ * @type {object}
+ * @property {string} context - anaesthesia, regional, procedure
+ * @property {string} name - name of regional or procedure, for anaesthesia "GA" or "Sedation"
+ * @property {array} technique - "Landmark", "Ultrasound", "Nerve Stimulator", "Catheter", "Observed" || "Volatile", "TIVA", "RSI"
+ *
+ * @property {array} airway - "LMA", "ETT", "DLT" (only for anaesthesia)
+ * @property {string} category - airway, access, drains, other, custom, axial, lower limb, upper limb (optional)
+ * @property {array} outcome - "Failed" (optional)
+ * @property {array} supervision - "Immediate", "Local", "Distant", "Solo" (optional)
+ */
+```
+
+
+### Setting
+```js
+/**
+ * @type {object}
+ * @name setting
+ * @property {string} country - ISO 3166-1 alpha-2 country codes, such as "gb", "de", "at", "ug" (optional)
+ * @property {string} location - ie "Manchester Royal Infirmary" (optional)
+ * @property {string} rotation - ie "North West" (optional)
+ */
+```
+
+### Timing
+* Most modern logbooks store ```sessions``` rather than ```start``` and ```end``` times
+* ```Start``` and ```end``` times from older logbooks can be converted to ```session``` and ```duration```
+* Medberry only uses three sessions ("Day", "Evening", "Night") whilst most other logbooks use four sessions ("Morning", "Afternoon", "Evening", "Night")
+
+```js
+/**
+ * @type {object}
+ * @name timings
+ * @property {string} date - ISO 8601 format "YYYY-MM-DD"
+ * @property {string} session - "Morning", "Afternoon", "Evening", "Night"
+ * @property {number} duration - in minutes (optional)
+ */
+```
+
+### Training
+* The RCoA LLP and AnaestheticsApp Logbook use teaching and supervision when logging theatre cases
+* Levels of supervision are classified in [NOTES TO PROVIDE CLARIFICATION OF ACSA STANDARDS](https://www.rcoa.ac.uk/sites/default/files/documents/2019-08/ACSA-SelfAssessment-2019.pdf)
+
+```js
+/**
+ * @type {object}
+ * @name training
+ * @property {string} supervision - "Immediate", "Local", "Direct", "Remote", "Solo"
+ * @property {string} supervisor - ie "Consultant"; custom options are allowed
+ * @property {number} supervisor_id - optional
+ * @property {string} supervisor_name - optional
+ * @property {string} teaching - ie "Medical Student"; custom options are allowed
+ */
+```
+
 
 ## Optional properties being used by third-party logbooks
 ### AnaestheticsApp Logbook
