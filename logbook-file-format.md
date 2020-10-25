@@ -82,30 +82,29 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
 ```js
 /**
  * @type {object}
- * @property {object} event - date for theatre, icm, clinic, pain,...
- * @property {array} incidents - array of item objects
+ * @property {object} activity - data for theatre, icm, clinic, pain, ...
+ * @property {object} event - list of procedures, regional, anaesthesia, incidents
  * @property {object} metadata - data required by the logbook to interpret and handle the logbook case
  * @property {string} note - general notes
  * @property {object} patient - age, asa
- * @property {array} procedures - list of procedures, including regional
  * @property {object} setting - country, rotation, location (hospital)
  * @property {object} timing - date and session
  * @property {object} training - supervision, supervisor, teaching
  */
 ```
 
-### Event
+### Activity
 * This requires more thought
 
 ```js
 /**
  * @type {object}
- * @name event
+ * @name activity
  * @property {string} context - theatre | icm | phem | clinic | pain | procedure | session
  * @property {object} data
  */
 ```
-#### Event > Data
+#### Activity > Data
 ```js
 /**
  * @variation data(1) - context: theatre
@@ -123,18 +122,10 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  *
  * @variation data(3) - context: icm
  * @property {string} diagnosis - diagnosis such as "Pneumonia", "Diabetic ketoacidosis"
- * @property {string} activity - admission | daily review | ward review | cardiac arrest | trauma team | ward round | intra-hospital transfer | inter-hospital transfer | discussion with relatives | end of life care/donation
+ * @property {string} event - admission | daily review | ward review | cardiac arrest | trauma team | ward round | intra-hospital transfer | inter-hospital transfer | discussion with relatives | end of life care/donation
  * @property {string} speciality - (optional)
  * @property {string} referral - ie. "Hypotension" (optional)
  * @property {array} support - see below (optional)
- */
-```
-
-### Incidents
-```js
-/**
- * @type {object}
- * @property {string} name - name of incident
  */
 ```
 
@@ -176,21 +167,47 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  */
 ```
 
-### Procedures
+### Event
 ```js
 /**
  * @type {object}
- * @property {string} context - anaesthesia, regional, procedure
- * @property {string} name - name of regional or procedure, for anaesthesia "GA" or "Sedation"
- * @property {array} technique - "Landmark", "Ultrasound", "Nerve Stimulator", "Catheter", "Observed" || "Volatile", "TIVA", "RSI"
- *
- * @property {array} airway - "LMA", "ETT", "DLT" (only for anaesthesia)
+ * @name event
+ * @property {array} procedures -
+ * @property {array} regional -
+ * @property {array} anaesthesia -
+ * @property {array} incidents -
+ */
+```
+
+### Procedure / Regional
+```js
+/**
+ * @type {object}
+ * @property {string} name - name of regional or procedure
+ * @property {array} technique - "Landmark", "Ultrasound", "Nerve Stimulator", "Catheter", "Observed"
  * @property {string} category - airway, access, drains, other, custom, axial, lower limb, upper limb (optional)
  * @property {array} outcome - "Failed" (optional)
  * @property {array} supervision - "Immediate", "Local", "Distant", "Solo" (optional)
  */
 ```
 
+### Anaesthesia
+```js
+/**
+ * @type {object}
+ * @property {string} name - "GA", "Sedation", "Conversion to GA"
+ * @property {array} technique - "Volatile", "TIVA", "RSI"
+ * @property {array} airway - "LMA", "ETT", "DLT"
+ */
+```
+
+### Incidents
+```js
+/**
+ * @type {object}
+ * @property {string} name - name of incident
+ */
+```
 
 ### Setting
 ```js
