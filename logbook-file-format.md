@@ -12,10 +12,12 @@ img: ''
 * File format: JSON
 * Mime type: ```text/json```
 * Use case: anaesthesia logbooks
-* Example applications that can open ```.logbook``` files:
+* Applications that can open ```.logbook``` files:
   * The Logbook App [Preview Video](https://www.youtube.com/watch?v=iSJ5rMXmSbk)
 
-# Deep vs Flat Objects
+# JSON Style Guidelines
+
+## Deep vs Flat Objects
 There is no right or wrong answer, but one of the problems when looking for a property that's deep in a tree-like structure is that one often has to check whether intermediate nodes exist. Using the proposed ```event``` object as an example:
 
 ```js
@@ -42,7 +44,7 @@ To access the ```induction``` property, one would have to do the following:
 const induction = obj.event.procedure.category.general_anaesthesia.induction;
 ```
 
-If one of the intermediate nodes is missing (ie "general_anaesthesia" or "category"), JavaScript would throw an "Uncaught TypeError" error when trying to access the induction property. To write reliable code, it is good practice to add conditional checks for each property:
+If one of the intermediate nodes is missing (ie "general_anaesthesia" or "category"), JavaScript would throw an ```Uncaught TypeError``` when trying to access the induction property. To write reliable code, it is good practice to add conditional checks for each property:
 
 ```js
 // please don't make me do this
@@ -59,20 +61,20 @@ This adds a lot of complexity to the code, especially when writing a function to
 const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction;
 ```
 
-# JSON Style Guidelines
-* Property names
-  * Avoid the use of reserved JavaScript keywords (relevant here are "case", "private", "public").
-  * The first character must be a letter or an underscore (_).
-  * Subsequent letters can include any letter, number, or underscore.
-  * Variable names are case sensitive.
-  * Words should be joined and capitalised (ie ageUnits) rather than separated with an underscore (age_units).
-  * Array types should have plural property names, other fields are singular.
-  * Naming conflicts are avoided by incrementing the ```metadata.version``` value.
-* Property values
-  * Must be Unicode booleans, numbers, strings, objects, arrays, or null.
-  * Properties should be removed if a property value is empty or null.
-    * Properties with empty arrays should not be dropped.
-    * Does not apply to properties such as ```age``` or ```version```.
+## Property names
+* Avoid the use of reserved JavaScript keywords (relevant here are "case", "private", "public").
+* The first character must be a letter or an underscore (_).
+* Subsequent letters can include any letter, number, or underscore.
+* Variable names are case sensitive.
+* Words should be joined and capitalised (ie ageUnits) rather than separated with an underscore (age_units).
+* Array types should have plural property names, other fields are singular.
+* Naming conflicts are avoided by incrementing the ```metadata.version``` value.
+
+## Property values
+* Must be Unicode booleans, numbers, strings, objects, arrays, or null.
+* Properties should be removed if a property value is empty or null.
+  * Properties with empty arrays should not be dropped.
+  * Does not apply to properties such as ```age``` or ```version```.
 
 # Minimal Data Set
 * Mandatory data fields
@@ -83,8 +85,8 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
 /**
  * @type {object}
  * @property {object} activity - data for theatre, icm, clinic, pain, ...
- * @property {object} event - list of procedures, regional, anaesthesia, incidents
- * @property {object} metadata - data required by the logbook to interpret and handle the logbook case
+ * @property {object} event - procedures, regional, anaesthesia, incidents
+ * @property {object} metadata - data required to interpret and handle the logbook case
  * @property {string} note - general notes
  * @property {object} patient - age, asa
  * @property {object} setting - country, rotation, location (hospital)
@@ -93,44 +95,50 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  */
 ```
 
-### Activity
-* This requires more thought
+## Activity
 
 ```js
 /**
  * @type {object}
  * @name activity
- * @property {string} context - theatre | icm | phem | clinic | pain | procedure | session
- * @property {object} data
- */
-```
-#### Activity > Data
-```js
-/**
- * @variation data(1) - context: theatre
- * @property {string} operation - custom names are possible
- * @property {string} speciality - speciality of case
+ *
+ * @variation activity(1)
+ * @property {string} context - theatre
  * @property {string} priority - "Elective", "Urgent", "Expedited", "Immediate" - NCEPOD Classification
  * @property {string} destination - "Day Case", "Ward", "POCU", "Critical Care"
- * @property {string} secondary_name - (optional)
- * @property {string} secondary_speciality - (optional)
- * @property {string} tertiary_name - (optional)
- * @property {string} tertiary_speciality - (optional)
  *
- * @variation data(2) - context: clinic
- * @property {string} type - C-PEX, Pre-op, Chronic Pain
- *
- * @variation data(3) - context: icm
- * @property {string} diagnosis - diagnosis such as "Pneumonia", "Diabetic ketoacidosis"
+ * @variation activity(2)
+ * @property {string} context - icm
+ * @property {string} diagnosis - ie "Pneumonia"
  * @property {string} event - admission | daily review | ward review | cardiac arrest | trauma team | ward round | intra-hospital transfer | inter-hospital transfer | discussion with relatives | end of life care/donation
- * @property {string} speciality - (optional)
  * @property {string} referral - ie. "Hypotension" (optional)
  * @property {array} support - see below (optional)
+ *
+ * @variation activity(3)
+ * @property {string} context - clinic
+ * @property {string} type - C-PEX, Pre-op, Chronic Pain
+ *
+ *
+ * @variation activity(4)
+ * @property {string} context - phem | pain | procedure | session/event
  */
 ```
 
-### Metadata
-* Data stored here is required by the logbook to interpret and handle the encounter - the user should not be allowed to directly edit any properties
+### Support
+```js
+/**
+ * @type {object}
+ * @name support
+ * @property {array} Respiratory - "HFNO", "NIV", "IPPV", "ECMO"
+ * @property {array} Cardiovascular - "Intra-aortic balloon pump", "Pacing", "Ventricular assist device"
+ * @property {array} Neuro - "EEG", "ICP monitoring"
+ * @property {array} Renal - empty array, currently no further options available
+ * @property {array} Liver - empty array, currently no further options available
+ */
+```
+
+## Metadata
+* Data stored here is required to interpret and handle the logbook case - the user should not be allowed to directly edit any properties
 * The ```start``` timestamp is made up of the date and session time
   * Morning - 08:00:00
   * Afternoon - 13:00:00
@@ -153,7 +161,7 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  */
 ```
 
-### Patient
+## Patient
 * A lot of logbooks use age (+/- age units). These should be included in the patient object to prevent any loss of data and to allow re-importing logbook cases into the respective logbook.
 
 ```js
@@ -167,15 +175,16 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  */
 ```
 
-### Event
+## Event
 ```js
 /**
  * @type {object}
  * @name event
- * @property {array} procedures -
- * @property {array} regional -
  * @property {array} anaesthesia -
  * @property {array} incidents -
+ * @property {array} procedures -
+ * @property {array} regional -
+ * @property {array} surgery -
  */
 ```
 
@@ -195,7 +204,7 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
 ```js
 /**
  * @type {object}
- * @property {string} name - "GA", "Sedation", "Conversion to GA"
+ * @property {string} name - "GA", "Sedation"
  * @property {array} technique - "Volatile", "TIVA", "RSI"
  * @property {array} airway - "LMA", "ETT", "DLT"
  */
@@ -209,7 +218,16 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  */
 ```
 
-### Setting
+### Surgery
+```js
+/**
+ * @type {object}
+ * @property {string} name -
+ * @property {string} speciality -
+ */
+```
+
+## Setting
 ```js
 /**
  * @type {object}
@@ -220,7 +238,7 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  */
 ```
 
-### Timing
+## Timing
 * Most modern logbooks store ```sessions``` rather than ```start``` and ```end``` times
 * ```Start``` and ```end``` times from older logbooks can be converted to ```session``` and ```duration```
 * Medberry only uses three sessions ("Day", "Evening", "Night") whilst most other logbooks use four sessions ("Morning", "Afternoon", "Evening", "Night")
@@ -235,7 +253,7 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  */
 ```
 
-### Training
+## Training
 * The RCoA LLP and AnaestheticsApp Logbook use teaching and supervision when logging theatre cases
 * Levels of supervision are classified in [NOTES TO PROVIDE CLARIFICATION OF ACSA STANDARDS](https://www.rcoa.ac.uk/sites/default/files/documents/2019-08/ACSA-SelfAssessment-2019.pdf)
 
@@ -245,12 +263,10 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  * @name training
  * @property {string} supervision - "Immediate", "Local", "Direct", "Remote", "Solo"
  * @property {string} supervisor - ie "Consultant"; custom options are allowed
- * @property {number} supervisor_id - optional
- * @property {string} supervisor_name - optional
+ * @property {string} supervisorName - optional
  * @property {string} teaching - ie "Medical Student"; custom options are allowed
  */
 ```
-
 
 ## Optional properties being used by third-party logbooks
 ### AnaestheticsApp Logbook
@@ -260,16 +276,5 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  * @type {object}
  * @property {array} tags - array of strings with options "reflect", "draft", "followup"
  * @property {array} labels - array of strings with custom options
- * @property {object} location - country, region, hospital for a case
- */
-
-/**
- * @type {object}
- * @name support - nested in event (category = icm)
- * @property {array} Respiratory - options "HFNO", "NIV", "IPPV", "ECMO"
- * @property {array} Cardiovascular - options "Intra-aortic balloon pump", "Pacing", "Ventricular assist device"
- * @property {array} Neuro - options "EEG", "ICP monitoring"
- * @property {array} Renal - empty array, currently no further options available
- * @property {array} Liver - empty array, currently no further options available
  */
 ```
