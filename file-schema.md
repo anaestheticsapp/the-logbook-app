@@ -1,4 +1,4 @@
-```js
+```ts
 export interface LogbookFileFormatSchema {
   activity: {
     context: "theatre" | "icm" | "clinic" | "pain" | "procedure" | "session";
