@@ -11,9 +11,9 @@ img: ''
 * File extension: ```.logbook```
 * File format: JSON
 * Mime type: ```text/json```
+* JSON schema: [TypeScript](file-schema.md)
 * Use case: anaesthesia logbooks
-* Applications that can open ```.logbook``` files:
-  * The Logbook App [Preview Video](https://www.youtube.com/watch?v=iSJ5rMXmSbk)
+  * TheLogbook App [Preview Video](https://www.youtube.com/watch?v=iSJ5rMXmSbk)
 
 # JSON Style Guidelines
 
@@ -111,7 +111,6 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  * @property {string} context - icm
  * @property {string} diagnosis - ie "Pneumonia"
  * @property {string} referral - ie. "Hypotension" (optional)
- * @property {array} support - see below (optional)
  * @property {string} type - admission | daily review | ward review | cardiac arrest | trauma team | ward round | intra-hospital transfer | inter-hospital transfer | discussion with relatives | end of life care/donation
  *
  * @variation activity(3)
@@ -149,6 +148,14 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  */
 ```
 
+### Incidents
+```js
+/**
+ * @type {object}
+ * @property {string} name - name of incident
+ */
+```
+
 ### Procedure / Regional
 ```js
 /**
@@ -159,23 +166,6 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  * @property {string} outcome - "Failed" (optional)
  * @property {string} notes - "Failed" (optional)
  * @property {string} supervision - "Immediate", "Local", "Distant", "Solo" (optional)
- */
-```
-
-### Incidents
-```js
-/**
- * @type {object}
- * @property {string} name - name of incident
- */
-```
-
-### Surgeries
-```js
-/**
- * @type {object}
- * @property {string} name -
- * @property {string} speciality -
  */
 ```
 
@@ -191,6 +181,16 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  * @property {array} Liver - empty array, currently no further options available
  */
 ```
+
+### Surgeries
+```js
+/**
+ * @type {object}
+ * @property {string} name -
+ * @property {string} speciality -
+ */
+```
+
 
 ## Metadata
 * Data stored here is required to interpret and handle the logbook case - the user should not be allowed to directly edit any properties
