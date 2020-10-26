@@ -71,9 +71,9 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
 * Naming conflicts are avoided by incrementing the ```metadata.version``` value.
 
 ## Property values
-* Must be Unicode booleans, numbers, strings, objects, arrays, or null.
+* Must be unicode booleans, numbers, strings, objects, arrays, or null.
 * Properties should be removed if a property value is empty or null.
-  * Properties with empty arrays should not be dropped.
+  * Top-level object properties should not be dropped.
   * Does not apply to properties such as ```age``` or ```version```.
 
 # Minimal Data Set
@@ -104,15 +104,15 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  *
  * @variation activity(1)
  * @property {string} context - theatre
- * @property {string} priority - "Elective", "Urgent", "Expedited", "Immediate" - NCEPOD Classification
- * @property {string} destination - "Day Case", "Ward", "POCU", "Critical Care"
+ * @property {string} destination - "Day Case", "Ward", "POCU", "Critical Care" (optional - except when day case)
+ * @property {string} priority - NCEPOD Classification "Elective", "Urgent", "Expedited", "Immediate"
  *
  * @variation activity(2)
  * @property {string} context - icm
  * @property {string} diagnosis - ie "Pneumonia"
- * @property {string} event - admission | daily review | ward review | cardiac arrest | trauma team | ward round | intra-hospital transfer | inter-hospital transfer | discussion with relatives | end of life care/donation
  * @property {string} referral - ie. "Hypotension" (optional)
  * @property {array} support - see below (optional)
+ * @property {string} type - admission | daily review | ward review | cardiac arrest | trauma team | ward round | intra-hospital transfer | inter-hospital transfer | discussion with relatives | end of life care/donation
  *
  * @variation activity(3)
  * @property {string} context - clinic
@@ -121,6 +121,61 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  *
  * @variation activity(4)
  * @property {string} context - phem | pain | procedure | session/event
+ */
+```
+
+## Event
+```js
+/**
+ * @type {object}
+ * @name event
+ * @property {object} anaesthesia -
+ * @property {array} incidents -
+ * @property {array} procedures -
+ * @property {array} regional -
+ * @property {array} support - optional for icm
+ * @property {array} surgeries -
+ */
+```
+
+### Anaesthesia
+```js
+/**
+ * @type {object}
+ * @name anaesthesia
+ * @property {array} airway - "LMA", "ETT", "DLT"
+ * @property {string} name - "GA", "Sedation"
+ * @property {array} options - "Volatile", "TIVA", "RSI"
+ */
+```
+
+### Procedure / Regional
+```js
+/**
+ * @type {object}
+ * @property {string} name - name of regional or procedure
+ * @property {array} options - "Landmark", "Ultrasound", "Nerve Stimulator", "Catheter", "Observed"
+ * @property {string} category - airway, access, drains, other, custom, axial, lower limb, upper limb (optional)
+ * @property {string} outcome - "Failed" (optional)
+ * @property {string} notes - "Failed" (optional)
+ * @property {string} supervision - "Immediate", "Local", "Distant", "Solo" (optional)
+ */
+```
+
+### Incidents
+```js
+/**
+ * @type {object}
+ * @property {string} name - name of incident
+ */
+```
+
+### Surgeries
+```js
+/**
+ * @type {object}
+ * @property {string} name -
+ * @property {string} speciality -
  */
 ```
 
@@ -151,13 +206,14 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
 /**
  * @type {object}
  * @name metadata
+ * @property {string} env - development | stable (optional)
  * @property {string} id - case id that must be unique
  * @property {string} name - logbook website, without "https://", ie "anaesthetics.app" or "lifelong.rcoa.ac.uk"
  * @property {object} timestamp - timestamps in milliseconds
  * @property {number} timestamp.start - timestamp when case was started
  * @property {number} timestamp.inserted - timestamp when case was inserted
  * @property {number} timestamp.edited - timestamp when case was edited (optional)
- * @property {number} version - represents version of logbook data schema, increment when object schema is modified
+ * @property {number} version - represents version of logbook data schema, increment when object schema is modified. No decimals as every change is a breaking change
  */
 ```
 
@@ -172,58 +228,7 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  * @property {string} ageUnits - only the following options are allowed: "Days", "Months", "Years"
  * @property {number} ageCategory - range 1-5 (optional)
  * @property {number} asa - range 1-6 (6 being "Donor") [ASA Classification](https://www.asahq.org/standards-and-guidelines/asa-physical-status-classification-system)
- */
-```
-
-## Event
-```js
-/**
- * @type {object}
- * @name event
- * @property {array} anaesthesia -
- * @property {array} incidents -
- * @property {array} procedures -
- * @property {array} regional -
- * @property {array} surgery -
- */
-```
-
-### Procedure / Regional
-```js
-/**
- * @type {object}
- * @property {string} name - name of regional or procedure
- * @property {array} technique - "Landmark", "Ultrasound", "Nerve Stimulator", "Catheter", "Observed"
- * @property {string} category - airway, access, drains, other, custom, axial, lower limb, upper limb (optional)
- * @property {array} outcome - "Failed" (optional)
- * @property {array} supervision - "Immediate", "Local", "Distant", "Solo" (optional)
- */
-```
-
-### Anaesthesia
-```js
-/**
- * @type {object}
- * @property {string} name - "GA", "Sedation"
- * @property {array} technique - "Volatile", "TIVA", "RSI"
- * @property {array} airway - "LMA", "ETT", "DLT"
- */
-```
-
-### Incidents
-```js
-/**
- * @type {object}
- * @property {string} name - name of incident
- */
-```
-
-### Surgery
-```js
-/**
- * @type {object}
- * @property {string} name -
- * @property {string} speciality -
+ * @property {string} sex - "Male", "Female"
  */
 ```
 
@@ -255,7 +260,7 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
 
 ## Training
 * The RCoA LLP and AnaestheticsApp Logbook use teaching and supervision when logging theatre cases
-* Levels of supervision are classified in [NOTES TO PROVIDE CLARIFICATION OF ACSA STANDARDS](https://www.rcoa.ac.uk/sites/default/files/documents/2019-08/ACSA-SelfAssessment-2019.pdf)
+* Levels of supervision are based on [NOTES TO PROVIDE CLARIFICATION OF ACSA STANDARDS](https://www.rcoa.ac.uk/sites/default/files/documents/2019-08/ACSA-SelfAssessment-2019.pdf)
 
 ```js
 /**
