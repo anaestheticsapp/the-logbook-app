@@ -253,7 +253,7 @@ const induction = obj.event?.procedure?.category?.general_anaesthesia?.induction
  * @type {object}
  * @name timings
  * @property {string} date - ISO 8601 format "YYYY-MM-DD"
- * @property {string} session - "Morning", "Afternoon", "Evening", "Night"
+ * @property {array} sessions - "Morning", "Afternoon", "Evening", "Night"
  * @property {number} duration - in minutes (optional)
  */
 ```
