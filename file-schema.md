@@ -1,12 +1,16 @@
 ```ts
 export interface LogbookFileFormatSchema {
   activity: {
-    context: "theatre" | "icm" | "clinic" | "pain" | "procedure" | "session";
+    context: "theatre" | "icm" | "event" | "pain" | "procedure";
     destination?: "Day Case" | "Ward" | "POCU" | "Critical Care";
     priority?: "Elective" | "Urgent" | "Expedited" | "Immediate";
     diagnosis?: string;
     referral?: string;
     type?: string;
+    name?: string;
+    cpdPoints? :string;
+    cpdType? :string;
+    location? :string;
   };
   event: {
     anaesthesia?: {
@@ -71,7 +75,7 @@ export interface LogbookFileFormatSchema {
   };
   timing: {
     date: string;
-    session: "Morning" | "Afternoon" | "Evening" | "Night";
+    sessions: ("Morning" | "Afternoon" | "Evening" | "Night")[];
     duration?: number;
   };
   training: {
